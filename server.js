@@ -32,5 +32,5 @@ app.get('/',(req,res)=>{
   res.send('hello world')
 })
 app.listen(5000,()=>{
-  console.log('后台服务启动成功')
+  console.log('http://localhost:5000')
 })
