@@ -44,14 +44,11 @@ router.post('/login', (req, res) => {
 	let password = req.body.password;
 	let md5 = crypto.createHash("md5");
 	let newPas = md5.update(password).digest("hex");
-	console.log(newPas)
 	User.findOne({
-		username: req.body.username,
+		email,
 		password: newPas
 	}).then(user => {
-		if (!user) { //token
-			return res.status(404).json("用户不存在")
-		} else {
+		if (user) { //token
 			const rule = { //token规则,包含哪些字段
 				id: user.id,
 				username: user.username,
@@ -68,6 +65,8 @@ router.post('/login', (req, res) => {
 					token: "Bearer " + token
 				})
 			})
+		} else {
+			return res.status(404).json("用户不存在")
 		}
 	}).catch(err => {
 		console.log("错误是:" + err)
