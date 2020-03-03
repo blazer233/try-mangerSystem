@@ -1,36 +1,32 @@
-const express = require('express')
+const koa = require('koa')
+const Router = require('koa-router')
+const app = new koa()
+const router = new Router()
 const mongoose = require('mongoose')
-const bodyParser = require('body-parser')
-const passport = require('passport')
-const app = express()
+const bodyParser=require('koa-bodyparser')
+const users = require('./routers/user.js')
+const profiles = require('./routers/profiles')
+const passport = require('koa-passport')
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended:false}))
-
-//passport 初始化
+app.use(bodyParser())
+app.use(router.routes())
+app.use(router.allowedMethods())
 app.use(passport.initialize())
+app.use(passport.session())
 require('./config/passport')(passport)
 
-const users = require('./routers/api/users')
-const profiles = require('./routers/api/profiles')
+mongoose.connect("mongodb://localhost:27017/vue", {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
+    .then(() => console.log('mongoose true'))
+    .catch((err) => console.log('mongoose false' + err))
 
-app.use('/api/users',users)
-app.use('/api/profiles',profiles)
-//DB config
-mongoose.connect('mongodb://localhost:27017/mangerSystem', {
-    useNewUrlParser: true,useUnifiedTopology: true
-}, (err) => {
-    if (err) {
-        console.log("数据库连接失败")
-    } else {
-        console.log("数据库连接成功")
-    }
-})
+router.use('/api/users',users)
+router.use('/api/profiles',profiles)
 
 
-app.get('/',(req,res)=>{
-  res.send('hello world')
-})
-app.listen(5000,()=>{
-  console.log('http://localhost:5000')
+const port = process.env.PORT || 5000
+app.listen(port, () => {
+    console.log(`server run ${port}`)
 })
