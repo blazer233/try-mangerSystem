@@ -5,6 +5,7 @@ const router = new Router()
 const mongoose = require('mongoose')
 const bodyParser=require('koa-bodyparser')
 const users = require('./routers/user.js')
+const week = require('./routers/week.js')
 const profiles = require('./routers/profiles')
 const passport = require('koa-passport')
 
@@ -23,6 +24,7 @@ mongoose.connect("mongodb://localhost:27017/vue", {
     .catch((err) => console.log('mongoose false' + err))
 
 router.use('/api/users',users)
+router.use('/api/week',week)
 router.use('/api/profiles',profiles)
 
 
