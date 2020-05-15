@@ -10,11 +10,15 @@
         <div class="userinfo">
           <div class="user-item">
             <i class="el-icon-info"></i>
-            <span>{{user.username}}</span>
+            <span>{{user.name}}</span> 
           </div>
           <div class="user-item">
             <i class="el-icon-setting"></i>
             <span>{{user.identity == "manager" ? "管理员" : "普通用户"}}</span>
+          </div>
+          <div class="user-item">
+            <i class="el-icon-setting"></i>
+            <span>{{user.date.replace('T',' ').slice(0,-5)}}</span>
           </div>
         </div>
       </el-col>
@@ -26,7 +30,7 @@
 export default {
   name: "infoshow",
   computed: {
-    user(){
+    user(){ 
       return this.$store.getters.user
     }
   },
