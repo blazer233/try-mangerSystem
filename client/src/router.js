@@ -7,6 +7,8 @@ import Login from './views/Login.vue'
 import Home from './views/Home.vue'
 import Infoshow from './views/Infoshow.vue'
 import Fundlist from './views/Fundlist.vue'
+import workerlist from './views/workerlist.vue'
+import workerlist_week from './views/workerlist_week.vue'
 Vue.use(Router)
 
 const router =  new Router({
@@ -25,7 +27,9 @@ const router =  new Router({
         { path: "", component: Home },
         { path: "/home", name: "home", component: Home },
         { path: "/infoshow", name: "infoshow", component: Infoshow },
-        { path: "/fundlist", name: "fundlist", component: Fundlist }
+        { path: "/fundlist", name: "fundlist", component: Fundlist },
+        { path: "/workerlist_week", name: "workerlist_week", component: workerlist_week },
+        { path: "/workerlist", name: "workerlist", component: workerlist }
 
       ]
     },
@@ -35,7 +39,7 @@ const router =  new Router({
       component: Register
     },
     {
-      path: '/Notfound',
+      path: '/Notfound', 
       name: '/404',
       component: Notfound
     },
