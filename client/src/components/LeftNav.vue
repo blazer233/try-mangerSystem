@@ -1,11 +1,12 @@
 <template>
   <el-row class="menu_page">
-    <el-col >
+    <el-col>
       <el-menu
         class="el-menu-vertical-demo"
         background-color="#324057"
         text-color="#fff"
-        active-text-color="#409eff">
+        active-text-color="#409eff"
+      >
         <router-link to="/home">
           <el-menu-item index="0">
             <span slot="title">首页</span>
@@ -15,7 +16,7 @@
               <div slot="title">
                 <span>{{item.name}}</span>
               </div>
-              <router-link v-for="(citem,cindex) in item.children" :to="citem.path"  :key="cindex">
+              <router-link v-for="(citem,cindex) in item.children" :to="citem.path" :key="cindex">
                 <el-menu-item :index="cindex.path">
                   <span slot="title">{{citem.name}}</span>
                 </el-menu-item>
@@ -30,31 +31,38 @@
 
 <script>
 export default {
-  name: 'left-nav',
+  name: "left-nav",
   data() {
     return {
       items: [
         {
-          name: '资金管理',
+          name: "资金管理",
           path: "fund",
+          children: [{ path: "fundlist", name: "资金流水" }]
+        },
+        {
+          name: "员工管理",
+          path: "worker",
           children: [
-            { path: "fundlist", name:"资金流水" }
+            { path: "workerlist", name: "员工请假" },
+            { path: "workerlist_week", name: "员工管理" }
           ]
         },
         {
-          name: '信息管理',
+          name: "信息管理",
           path: "info",
-          children: [
-            { path: "infoshow", name:"个人信息" }
-          ]
+          children: [{ path: "infoshow", name: "个人信息" }]
         }
       ]
-    }
+    };
   },
-  methods: {
-    
+  created() {
+    this.items[1].children =
+      this.$store.getters.user.identity == "manager"
+        ? this.items[1].children.slice(1)
+        : this.items[1].children.slice(0, 1);
   }
-}
+};
 </script>
 
 <style scoped>
