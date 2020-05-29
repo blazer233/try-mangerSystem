@@ -28,30 +28,17 @@
           <el-form-item label="是否带薪办公">
             <el-switch v-model="form.delivery"></el-switch>
           </el-form-item>
-          <el-form-item label="请假证明">
-            <el-upload
-              class="upload-demo"
-              drag
-              action="#"
-              :http-request="httpRequest"
-              ref="upload"
-              :limit="1"
-              multiple
-            >
-              <i class="el-icon-upload"></i>
-              <div class="el-upload__text">
-                将文件拖到此处，或
-                <em>点击上传</em>
-              </div>
-              <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-            </el-upload>
-          </el-form-item>
           <el-form-item label="请假原因">
-            <el-input type="textarea" v-model="form.descc" style="width: 400px;" :rows="4"></el-input>
+            <quill-editor
+              ref="myTextEditor"
+              v-model="form.descc"
+              :options="editorOption"
+              style="height: 30rem;"
+            ></quill-editor>
           </el-form-item>
+
           <el-form-item>
-            <el-button type="primary" @click="onSubmit">提交</el-button>
-            <el-button>取消</el-button>
+            <el-button type="primary" @click="onSubmit" class="btn_">提交</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -71,23 +58,27 @@
               <el-form-item label="是否带薪">
                 <span>{{ props.row.delivery ? '是':'否'}}</span>
               </el-form-item>
-              <el-form-item label="请假时间">
-                <span>{{ props.row.date0 }}-{{ props.row.date1 }}</span>
-              </el-form-item>
               <el-form-item label="原因">
-                <span>{{ props.row.desc }}</span>
+                <span v-html="props.row.desc"></span>
+              </el-form-item>
+              <el-form-item label="请假时间">
+                <span>{{ props.row.data1 }}---{{ props.row.date0 }}</span>
               </el-form-item>
             </el-form>
           </template>
         </el-table-column>
-        <el-table-column label="编号" prop="_id"></el-table-column>
+        <el-table-column label="姓名" prop="name"></el-table-column>
         <el-table-column label="请假类型" prop="region"></el-table-column>
-        <el-table-column label="原因" prop="desc"></el-table-column>
       </el-table>
     </div>
   </div>
 </template>
 <script>
+import { getWeek, controlWeek } from "@/api/api";
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+import { quillEditor } from "vue-quill-editor";
 export default {
   data() {
     return {
@@ -100,35 +91,24 @@ export default {
         descc: ""
       },
       value: new Date(),
-      tableData: []
+      tableData: [],
+      editorOption: {
+        placeholder: "Hello World"
+      }
     };
   },
   methods: {
-    httpRequest(data) {
-      console.log(data);
-      let formData = new FormData();
-      let file_ = data.file;
-      formData.append("file", file_);
-      formData.append("name", file_.name);
-      formData.append("id", this.$store.getters.user.id);
-      const headerConfig = {
-        headers: { "Content-Type": "multipart/form-data" }
-      };
-      this.$axios.post("/api/Week/upload", formData, headerConfig).then(res => {
-        console.log(res);
-      });
-    },
     async onSubmit() {
       let submit = {
         find_id: this.$store.getters.user.id,
         name: this.form.name,
         region: this.form.region,
-        date0: this.form.date[0].toLocaleDateString(),
-        data1: this.form.date[1].toLocaleDateString(),
-        desc: this.form.descc,
+        date0: this.form.date[0],
+        data1: this.form.date[1],
+        desc: this.form.descc, 
         delivery: this.form.delivery
       };
-      let res = await this.$axios.post(`/api/Week/add`, submit);
+      let res = await controlWeek("/add", submit);
       if (res.status == 200) {
         this.onFind();
         this.$message({
@@ -139,14 +119,19 @@ export default {
       }
     },
     async onFind() {
-      let res = await this.$axios.get(
-        `/api/Week/${this.$store.getters.user.id}`
-      );
+      let res = await getWeek(this.$store.getters.user.id);
       this.tableData = res.data;
+      console.log(this.tableData);
+    },
+    onEditorChange({ editor, html, text }) {
+      console.log(editor, html, text);
     }
   },
   created() {
     this.onFind();
+  },
+  components: {
+    quillEditor
   }
 };
 </script>
@@ -172,5 +157,8 @@ export default {
   margin-right: 0;
   margin-bottom: 0;
   width: 50%;
+}
+.btn_ {
+  margin: 7rem 0 0 45rem;
 }
 </style>
