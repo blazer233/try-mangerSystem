@@ -3,10 +3,11 @@ const Router = require('koa-router')
 const app = new koa()
 const router = new Router()
 const mongoose = require('mongoose')
-const bodyParser=require('koa-bodyparser')
+const bodyParser = require('koa-bodyparser')
 const users = require('./routers/user.js')
 const week = require('./routers/week.js')
 const profiles = require('./routers/profiles')
+const department = require('./routers/department.js')
 const passport = require('koa-passport')
 
 app.use(bodyParser())
@@ -23,9 +24,10 @@ mongoose.connect("mongodb://localhost:27017/vue", {
     .then(() => console.log('mongoose true'))
     .catch((err) => console.log('mongoose false' + err))
 
-router.use('/api/users',users)
-router.use('/api/week',week)
-router.use('/api/profiles',profiles)
+router.use('/api/users', users)
+router.use('/api/week', week)
+router.use('/api/profiles', profiles)
+router.use('/api/department', department)
 
 
 const port = process.env.PORT || 5000
