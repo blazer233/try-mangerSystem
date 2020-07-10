@@ -10,9 +10,10 @@
   "dependencies": {
     "axios": "^0.18.0",
     "core-js": "^2.6.5",
-    "element-ui": "^2.7.0",
+    "element-ui": "^2.13.2",
     "jwt-decode": "^2.2.0",
     "vue": "^2.6.6",
+    "vue-cropper": "^0.5.2",
     "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
