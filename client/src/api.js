@@ -9,9 +9,16 @@ function Axios(options) {
     };
     return requestObj;
 }
+//人员查找
+export function findUser(userName) {
+    var temp = Object.assign({
+        url: isDev ? `/api/users/all?userName=${userName}` : "线上地址",
+    }, {});
+    return axios(Axios(temp));
+}
 
 //人员管理
-export function controlUser(url,obj) {
+export function controlUser(url, obj) {
     var temp = Object.assign({
         url: isDev ? `/api/users/${url}` : "线上地址",
         method: 'post',
@@ -30,16 +37,18 @@ export function controlWeek(url, obj) {
     return axios(Axios(temp));
 }
 //请假查询
-export function getWeek(id = '') {
+export function getWeek(id = '', url) {
     let temp = Object.assign({
-        url: isDev ? `/api/Week/${id}` : "线上地址"
+        url: isDev ? `/api/Week/${url}?id=${id}` : "线上地址"
     }, {});
     return axios(Axios(temp));
 }
 //项目查询
-export function getProfiles() {
+export function getProfiles(obj) {
     var temp = Object.assign({
-        url: isDev ? "/api/profiles" : "线上地址"
+        url: isDev ? "/api/profiles" : "线上地址",
+        method: 'post',
+        data: obj
     }, {});
     return axios(Axios(temp));
 }
@@ -57,6 +66,22 @@ export function controlProfiles(url, obj) {
         url: isDev ? `/api/profiles/${url}` : "线上地址",
         method: 'post',
         data: obj
+    }, {});
+    return axios(Axios(temp));
+}
+//部门查询
+export function getDepartment() {
+    var temp = Object.assign({
+        url: isDev ? `/api/department/all` : "线上地址",
+    }, {});
+    return axios(Axios(temp));
+}
+//部门增改
+export function ctrlDepartment(url, obj) {
+    var temp = Object.assign({
+        url: isDev ? `/api/department/${url}` : "线上地址",
+        data: obj,
+        method: 'post'
     }, {});
     return axios(Axios(temp));
 }
