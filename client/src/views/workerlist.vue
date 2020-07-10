@@ -1,137 +1,138 @@
 <template>
   <div class="notfound">
-    <div class="everyItem">
-      <div style="flex: 0.5;">
-        <el-form ref="form" :model="form" label-width="100px">
-          <el-form-item label="请假人">
-            <el-input v-model="form.name" style="width: 13rem;"></el-input>
-          </el-form-item>
-          <el-form-item label="请假类型">
-            <el-select v-model="form.region" placeholder="请选择请假类型">
-              <el-option label="事假" value="事假"></el-option>
-              <el-option label="病假" value="病假"></el-option>
-              <el-option label="产假" value="产假"></el-option>
-              <el-option label="丧假" value="丧假"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="请假时间">
-            <el-col :span="11">
-              <el-date-picker
-                v-model="form.date"
-                type="datetimerange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-              ></el-date-picker>
-            </el-col>
-          </el-form-item>
-          <el-form-item label="是否带薪办公">
-            <el-switch v-model="form.delivery"></el-switch>
-          </el-form-item>
-          <el-form-item label="请假原因">
-            <quill-editor
-              ref="myTextEditor"
-              v-model="form.descc"
-              :options="editorOption"
-              style="height: 30rem;"
-            ></quill-editor>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button type="primary" @click="onSubmit" class="btn_">提交</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-      <el-table :data="tableData" style="width: 100%;height: 100%;">
-        <el-table-column type="expand">
-          <template slot-scope="props">
-            <el-form label-position="left" inline class="demo-table-expand">
-              <el-form-item label="姓名">
-                <span>{{ props.row.name }}</span>
-              </el-form-item>
-              <el-form-item label="请假类型">
-                <span>{{ props.row.region }}</span>
-              </el-form-item>
-              <el-form-item label="编号">
-                <span>{{ props.row._id }}</span>
-              </el-form-item>
-              <el-form-item label="是否带薪">
-                <span>{{ props.row.delivery ? '是':'否'}}</span>
-              </el-form-item>
-              <el-form-item label="原因">
-                <span v-html="props.row.desc"></span>
-              </el-form-item>
-              <el-form-item label="请假时间">
-                <span>{{ props.row.data1 }}---{{ props.row.date0 }}</span>
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-table-column>
-        <el-table-column label="姓名" prop="name"></el-table-column>
-        <el-table-column label="请假类型" prop="region"></el-table-column>
-      </el-table>
+    <div class="leave" v-if="$store.getters.user.identity">请假审批</div>
+    <div class="leave" v-else>请假填写</div>
+    <div class="leaveFrom2" v-if="$store.getters.user.identity">
+      <koa-table
+        :tableHeader="tableHeader_er"
+        :tableData="tableData"
+        :total="total"
+        :border="false"
+        :expand="true"
+        :type_="2"
+        @editOne="onControl"
+        @pagination_size_change="onFind"
+      />
+      <!-- 弹框页面 -->
+      <el-dialog
+        :visible.sync="show"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        :modal-append-to-body="false"
+        v-dialogDrag
+        class="dialogClass"
+      >
+        <div slot="title" class="dialog_class">
+          <span>审批</span>
+        </div>
+        <div style="height:500px">
+          <!-- 弹框表单 -->
+          <koa-search
+            ref="search_er"
+            :search_all="tableSearch_er"
+            :controlType="controlType"
+            :type_="3"
+            @getList="onSubmit"
+            size="mini"
+            :isinline="false"
+          />
+        </div>
+      </el-dialog>
+    </div>
+    <div class="leaveFrom1" v-else>
+      <koa-search
+        ref="search_ee"
+        :type_="2"
+        :search_all="tableSearch_ee"
+        :controlType="controlType"
+        @getList="onSubmit"
+        size="mini"
+      />
+      <koa-table
+        :tableHeader="tableHeader_ee"
+        :tableData="tableData"
+        :total="total"
+        :border="false"
+        :expand="true"
+        :type_="2"
+        @pagination_size_change="onFind"
+      />
     </div>
   </div>
 </template>
 <script>
 import { getWeek, controlWeek } from "@/api/api";
-import "quill/dist/quill.core.css";
-import "quill/dist/quill.snow.css";
-import "quill/dist/quill.bubble.css";
-import { quillEditor } from "vue-quill-editor";
+import { Config } from "@/components/config/config";
+import KoaTable from "@/components/config/table_all";
+import KoaSearch from "@/components/config/from_all";
 export default {
   data() {
     return {
-      form: {
-        name: this.$store.getters.user.name,
-        upload: "",
-        region: "",
-        date: "",
-        delivery: false,
-        descc: ""
-      },
-      value: new Date(),
+      tableHeader_ee: Config.weekTable.table,
+      tableSearch_ee: Config.weekTable.search,
+      tableHeader_er: Config.weekTable_employer.table,
+      tableSearch_er: Config.weekTable_employer.search,
+      controlType: Config.controlType,
       tableData: [],
-      editorOption: {
-        placeholder: "Hello World"
-      }
+      id: "",
+      show: false,
+      total: 0
     };
   },
   methods: {
-    async onSubmit() {
-      let submit = {
-        find_id: this.$store.getters.user.id,
-        name: this.form.name,
-        region: this.form.region,
-        date0: this.form.date[0],
-        data1: this.form.date[1],
-        desc: this.form.descc, 
-        delivery: this.form.delivery
-      };
-      let res = await controlWeek("/add", submit);
+    async onSubmit(obj) {
+      let submit = {};
+      if (obj.date) {
+        submit = {
+          super_id: obj.find_id,
+          name_id: this.$store.getters.user.id,
+          region: obj.region,
+          date0: obj.date[0],
+          date1: obj.date[1],
+          desc: obj.desc,
+          delivery: obj.delivery
+        };
+      } else {
+        submit = {
+          isPass: obj.isPass,
+          passRes: obj.passRes ? obj.passRes : "",
+          id: this.id
+        };
+      }
+      let url = this.$store.getters.user.identity ? "approval" : "add";
+      let res = await controlWeek(url, submit);
       if (res.status == 200) {
         this.onFind();
         this.$message({
           message: "提交成功！",
           type: "success"
         });
-        this.$refs.form.resetFields();
+        this.show = false;
+        this.$nextTick(function() {
+          this.$store.getters.user.identity
+            ? this.$refs.search_er.resetForm("search_from")
+            : this.$refs.search_ee.resetForm("search_from");
+        });
       }
     },
-    async onFind() {
-      let res = await getWeek(this.$store.getters.user.id);
-      this.tableData = res.data;
-      console.log(this.tableData);
+    // 操作
+    onControl(row) {
+      this.id = row._id;
+      this.show = true;
     },
-    onEditorChange({ editor, html, text }) {
-      console.log(editor, html, text);
+    async onFind() {
+      let url = this.$store.getters.user.identity ? "employer" : "one";
+      let res = await getWeek(this.$store.getters.user.id, url);
+      this.tableData = res.data.list;
+      this.total = res.data.total;
     }
   },
-  created() {
+  mounted() {
     this.onFind();
   },
   components: {
-    quillEditor
+    KoaTable,
+    KoaSearch
   }
 };
 </script>
@@ -141,10 +142,32 @@ export default {
   height: 100%;
   overflow: hidden;
 }
-.everyItem {
+.dialogClass .el-dialog__body {
+  padding: 0px 20px 40px 20px !important;
+  color: #606266;
+  font-size: 14px;
+}
+.dialog_class {
+  font-weight: bold;
+  font-size: 20px;
+  font-size: 18px;
+  color: white;
+}
+.leave {
+  font-size: 25px;
+  border-bottom: 1px solid;
+  margin: 1rem 5rem;
+  padding: 2rem 2rem;
+}
+.leaveFrom2 {
+  margin: 0rem 5rem 0 5rem;
+}
+.leaveFrom1 {
+  margin: 0rem 5rem 0 5rem;
   display: flex;
-  justify-content: space-around;
-  margin: 3rem 0 0 1rem;
+}
+.leaveFrom1 > div {
+  width: 50%;
 }
 .demo-table-expand {
   font-size: 0;
