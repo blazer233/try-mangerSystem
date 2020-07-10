@@ -11,14 +11,14 @@
           <el-menu-item index="0">
             <span slot="title">首页</span>
           </el-menu-item>
-          <div v-for="item in items" :key="item.name">
+          <div v-for="item in summary" :key="item.name">
             <el-submenu v-if="item.children" :index="item.path" :key="item.path">
               <div slot="title">
                 <span>{{item.name}}</span>
               </div>
-              <router-link v-for="(citem,cindex) in item.children" :to="citem.path" :key="cindex">
-                <el-menu-item :index="cindex.path">
-                  <span slot="title">{{citem.name}}</span>
+              <router-link v-for="(i,index) in item.children" :to="i.path" :key="index">
+                <el-menu-item :index="index.path">
+                  <span slot="title">{{i.name}}</span>
                 </el-menu-item>
               </router-link>
             </el-submenu>
@@ -34,7 +34,7 @@ export default {
   name: "left-nav",
   data() {
     return {
-      items: [
+      summary: [
         {
           name: "资金管理",
           path: "fund",
@@ -43,10 +43,7 @@ export default {
         {
           name: "员工管理",
           path: "worker",
-          children: [
-            { path: "workerlist", name: "员工请假" },
-            { path: "workerlist_week", name: "员工管理" }
-          ]
+          children: [{ path: "workerlist", name: "员工请假" }]
         },
         {
           name: "信息管理",
@@ -55,12 +52,6 @@ export default {
         }
       ]
     };
-  },
-  created() {
-    this.items[1].children =
-      this.$store.getters.user.identity == "manager"
-        ? this.items[1].children.slice(1)
-        : this.items[1].children.slice(0, 1);
   }
 };
 </script>
