@@ -3,25 +3,6 @@ const router = new Router()
 const passport = require('koa-passport')
 const Profile = require('../models/Profiles')
 
-//插入数据
-router.get('/toall', async ctx => {
-    try {
-        let dd = {
-            type: '折旧费',
-            describe: '设备折旧损坏',
-            income: '5115',
-            expend: '900',
-            cash: '18000',
-            remark: '900',
-            id: ''
-        }
-        let cc = new Array(1000).fill(dd)
-        let result = await Profile.insertMany(cc)
-        result ? ctx.body = result : ''
-    } catch (error) {
-        console.log(error)
-    }
-})
 
 //创建信息
 router.post('/add', passport.authenticate('jwt', {
@@ -30,21 +11,44 @@ router.post('/add', passport.authenticate('jwt', {
     try {
         let writeone = new Profile(ctx.request.body)
         let result = await writeone.save()
-        ctx.body = result ? result : ''
+        ctx.body = result.ok ? true : false
     } catch (error) {
-        console.log(error)
+        console.log('错误是' + error)
     }
 
 })
 
 //获得全部信息
-router.get('/', passport.authenticate('jwt', {
+//ctx.request是context经过封装的请求对象，ctx.req是context提供的node.js原生HTTP请求对象
+router.post('/', passport.authenticate('jwt', {
     session: false
 }), async ctx => {
     try {
-        let result = await Profile.find()
-        ctx.body = result ? result : {
-            info: '没有任何内容'
+        let index = ctx.request.body.page_index - 1
+        let size = ctx.request.body.page_size
+        let date1 = ctx.request.body.date1 ? ctx.request.body.date1 : 0
+        let date2 = ctx.request.body.date2 ? ctx.request.body.date2 : Number.POSITIVE_INFINITY
+        let total = await Profile.find({
+            "date": {
+                $gte: date1,
+                $lte: date2
+            }
+        }).countDocuments();
+        let result = await Profile.find({
+            "date": {
+                $gt: date1,
+                $lt: date2
+            }
+        }).sort({
+            _id: -1
+        }).limit(Number(size)).skip(Number(index * size))
+        if (result) {
+            ctx.body = {
+                list: result,
+                total: total
+            }
+        } else {
+            ctx.body = ''
         }
     } catch (error) {
         console.log(error)
@@ -52,16 +56,14 @@ router.get('/', passport.authenticate('jwt', {
 
 })
 
-//获取单个信息
-router.get('/:id', passport.authenticate('jwt', {
+// 删除信息
+router.delete('/delete/:id', passport.authenticate('jwt', {
     session: false
 }), async ctx => {
-    let result = await Profile.findOne({
+    let result = await Profile.deleteOne({
         _id: ctx.params.id
     })
-    ctx.body = result ? result : {
-        info: '没有任何内容'
-    }
+    ctx.body = result.ok ? true : false
 })
 
 //编辑信息
@@ -71,17 +73,6 @@ router.post('/edit/:id', passport.authenticate('jwt', {
     let result = await Profile.updateOne({
         _id: ctx.params.id
     }, ctx.request.body)
-    ctx.body = result ? result : ''
-})
-
-
-// 删除信息
-router.delete('/delete/:id', passport.authenticate('jwt', {
-    session: false
-}), async ctx => {
-    let result = await Profile.deleteOne({
-        _id: ctx.params.id
-    })
     ctx.body = result ? result : ''
 })
 
