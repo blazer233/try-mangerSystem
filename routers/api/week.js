@@ -2,7 +2,6 @@ const Router = require('koa-router')
 const router = new Router()
 const passport = require('koa-passport')
 const Week = require('../models/Week.js')
-const multer = require('multer')
 
 
 //创建信息
@@ -11,84 +10,86 @@ router.post('/add', passport.authenticate('jwt', {
 }), async ctx => {
     try {
         let writeone = new Week({
-            find_id: ctx.request.body.find_id,
-            name: ctx.request.body.name,
+            super_id: ctx.request.body.super_id,
+            name_id: ctx.request.body.name_id,
             region: ctx.request.body.region,
             date0: ctx.request.body.date0,
-            data1: ctx.request.body.data1,
+            date1: ctx.request.body.date1,
             desc: ctx.request.body.desc,
-            delivery: ctx.request.body.delivery
+            delivery: ctx.request.body.delivery == 1 ? true : false,
+            isPass: false,
+            passRes: ''
         })
         let result = await writeone.save()
-        ctx.body = result ? result : ''
+        console.log(result)
+        ctx.body = result ? true : false
     } catch (error) {
         console.log(error)
-    }
-
-})
-//
-router.post('/uploading', passport.authenticate('jwt', {
-    session: false
-}), async ctx => {
-    console.log(ctx.request.body)
-    // ctx.request.body
-    // console.log(req.body); //获取到的age和name
-    // console.log(req.file); //获取到的文件
-    // //做些其他事情
-})
-
-//获得全部信息
-router.get('/', passport.authenticate('jwt', {
-    session: false
-}), async ctx => {
-    try {
-        let result = await Week.find()
-        if (result) {
-            ctx.body = result
-        } else {
-            ctx.body = {
-                info: '没有任何内容'
-            }
-        }
-    } catch (error) {
-        console.log(error)
-    }
-
-})
-
-//获取单个信息 
-router.get('/:id', passport.authenticate('jwt', {
-    session: false
-}), async ctx => {
-    let result = await Week.find({
-        find_id: ctx.params.id
-    })
-    if (result) {
-        ctx.body = result
-    } else {
-        ctx.body = {
-            info: '没有任何内容'
-        }
     }
 })
 
 //编辑信息
-router.post('/edit/:id', passport.authenticate('jwt', {
+router.post('/approval', passport.authenticate('jwt', {
     session: false
 }), async ctx => {
-    let result = await Profile.updateOne({
-        _id: ctx.params.id
-    }, {
-        type: ctx.request.body.type,
-        describe: ctx.request.body.describe,
-        income: ctx.request.body.income,
-        expend: ctx.request.body.expend,
-        cash: ctx.request.body.cash,
-        remark: ctx.request.body.remark
-    })
-    ctx.body = result ? result : ''
+    try {
+        let isPass = ctx.request.body.isPass == 1 ? true : false
+        let result = await Week.updateOne({
+            _id: ctx.request.body.id
+        }, {
+            $set: {
+                isPass,
+                passRes: ctx.request.body.passRes,
+            }
+
+        })
+        console.log(result)
+        ctx.body = result.ok ? true : false
+    } catch (error) {
+        console.log(error)
+    }
 })
 
+//获取单个信息 
+router.get('/one', passport.authenticate('jwt', {
+    session: false
+}), async ctx => {
+    let result = await Week.find({
+        name_id: ctx.request.query.id
+    })
+    let total = await Week.find({
+        name_id: ctx.request.query.id
+    }).countDocuments();
+    if (result) {
+        ctx.body = {
+            list: result,
+            total
+        }
+    }
+})
+
+//获取对应员工信息 
+router.get('/employer', passport.authenticate('jwt', {
+    session: false
+}), async ctx => {
+    if (ctx.request.query.id) {
+        let result = await Week.find({
+            super_id: ctx.request.query.id
+        })
+        let total = await Week.find({
+            super_id: ctx.request.query.id
+        }).countDocuments();
+        if (result) {
+            ctx.body = {
+                list: result,
+                total
+            }
+        }
+    } else {
+        let result = await Week.find()
+        ctx.body = result ? result : ''
+    }
+})
 
 // 删除信息
 router.delete('/delete/:id', passport.authenticate('jwt', {
@@ -98,6 +99,69 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
         _id: ctx.params.id
     })
     ctx.body = result ? result : ''
+})
+
+router.get('/json', async ctx => {
+    ctx.body = {
+        sucess: true,
+        parents: [{
+                label: '文件夹1',
+                pid: 0,
+                id: 1
+            },
+            {
+                label: '文件夹2',
+                pid: 0,
+                id: 2
+            },
+            {
+                label: '文件夹3',
+                pid: 0,
+                id: 3
+            },
+            {
+                label: '文件夹1-1',
+                pid: 1,
+                id: 4
+            },
+            {
+                label: '文件夹2-1',
+                pid: 2,
+                id: 5
+            },
+        ],
+        child: [{
+                label: '文件1',
+                pid: 1,
+                id: 1001
+            },
+            {
+                label: '文件2',
+                pid: 1,
+                id: 1002
+            },
+            {
+                label: '文件2-1',
+                pid: 2,
+                id: 1003
+            },
+            {
+                label: '文件1-2',
+                pid: 2,
+                id: 1004
+            },
+            {
+                label: '文件1-1-1',
+                pid: 4,
+                id: 1005
+            },
+            {
+                label: '文件2-1-1',
+                pid: 5,
+                id: 1006
+            },
+        ]
+    }
 })
 
 module.exports = router.routes()
