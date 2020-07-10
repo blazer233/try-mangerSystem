@@ -2,12 +2,12 @@
   <header class="head-nav">
     <el-row>
       <el-col :span="6" class="logo-container">
-        <img src="../assets/logo.png" alt="" class="logo">
-        <span class="title">资金后台管理系统</span>
+        <img src="../assets/logo.png" class="logo" />
+        <span class="title">管理系统</span>
       </el-col>
       <el-col :span="6" class="user">
         <div class="userinfo">
-          <img :src="user.avatar" class="avatar" alt="">
+          <img :src="user.avatar" class="avatar" />
           <div class="welcome">
             <p class="name comename">欢迎</p>
             <p class="name avatarname">{{user.username}}</p>
@@ -31,36 +31,35 @@
 
 <script>
 export default {
-  name: 'head-nav',
+  name: "head-nav",
   computed: {
-   user(){
-     return this.$store.getters.user
-   }
+    user() {
+      return this.$store.getters.user;
+    }
   },
   methods: {
-    setDialogInfo(cmdItem){
-      switch(cmdItem){
+    setDialogInfo(cmdItem) {
+      switch (cmdItem) {
         case "info":
-          this.showInfoList()
-          break
+          this.showInfoList();
+          break;
         case "logout":
-          this.logOut()
-          break
+          this.logOut();
+          break;
       }
     },
-    showInfoList(){
-      this.$router.push("/infoshow")
+    showInfoList() {
+      this.$router.push("/infoshow");
     },
-    logOut(){ 
+    logOut() {
       //清除token
-      localStorage.removeItem("eleToken")
+      localStorage.removeItem("eleToken");
       //设置vuex store
-      this.$store.dispatch('clearCurrentState')
-      //跳转
-      this.$router.push('/login')
+      this.$store.dispatch("clearCurrentState");
+      this.$router.push("/login");
     }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -72,6 +71,8 @@ export default {
   background: #324057;
   color: #fff;
   border-bottom: 1px solid #1f2d3d;
+  position: fixed;
+  z-index: 4;
 }
 .logo-container {
   line-height: 60px;
