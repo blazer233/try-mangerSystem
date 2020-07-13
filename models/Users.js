@@ -14,7 +14,7 @@ const newSchema = new Schema({
         required: true
     },
     identity: {
-        type: String,
+        type: Boolean, 
         required: true
     },
     avatar: {
