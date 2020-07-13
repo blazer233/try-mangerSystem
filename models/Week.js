@@ -1,11 +1,11 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const newSchema = new Schema({
-    name: {
+    name_id: {
         type: String,
         required: true
     },
-    find_id: {
+    super_id: {
         type: String,
         required: true
     },
@@ -17,7 +17,7 @@ const newSchema = new Schema({
         type: String,
         required: true
     },
-    data1: {
+    date1: {
         type: String,
         required: true
     },
@@ -27,6 +27,13 @@ const newSchema = new Schema({
     },
     delivery: {
         type: Boolean,
+    },
+    isPass: {
+        type: Boolean,
+        required: true
+    },
+    passRes: {
+        type: String
     }
 })
 
