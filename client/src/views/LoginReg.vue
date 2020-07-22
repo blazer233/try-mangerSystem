@@ -37,8 +37,6 @@
   </div>
 </template>
 <script>
-import KoaTable from "@/components/config/table_all";
-import KoaSearch from "@/components/config/from_all";
 import { Config } from "@/components/config/config";
 import { controlUser } from "@/api/api";
 import jwt_decode from "jwt-decode";
@@ -86,10 +84,6 @@ export default {
       this.login = this.login ? false : true;
       this.point = this.point == "点击注册" ? "点击登录" : "点击注册";
     }
-  },
-  components: {
-    KoaTable,
-    KoaSearch
   }
 };
 </script>
