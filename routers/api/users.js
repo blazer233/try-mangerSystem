@@ -62,7 +62,6 @@ router.post('/register', async ctx => {
                 }
             }
         }
-
     } catch (error) {
         console.log(error)
     }
@@ -79,6 +78,7 @@ router.post('/avatar/:id', async ctx => {
     })
     ctx.body = result ? result : ''
 })
+
 
 router.post('/login', async ctx => {
     let find_ = await User.findOne({
@@ -105,13 +105,34 @@ router.post('/login', async ctx => {
                 identity: find_.identity
             }
             let token = jwt.sign(pay, 'art', {
-                expiresIn: 60 * 60 * 60 * 2
+                expiresIn: 10 * 60 * 60 * 2
             });
             ctx.body = {
                 success: true,
                 token: `Bearer ${token}`
             }
         }
+    }
+})
+
+//修改头像
+router.post('/userImg', async ctx => {
+    try {
+        let userImg = ctx.request.body
+        let result = await User.updateOne({
+            _id: userImg._id
+        }, {
+            $set: {
+                avatar: userImg.img_,
+            }
+        })
+        result.ok ? ctx.body = {
+            success: true
+        } : {
+            success: false
+        }
+    } catch (error) {
+        console.log(error)
     }
 })
 
