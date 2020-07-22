@@ -63,8 +63,6 @@
 <script>
 import { getWeek, controlWeek } from "@/api/api";
 import { Config } from "@/components/config/config";
-import KoaTable from "@/components/config/table_all";
-import KoaSearch from "@/components/config/from_all";
 export default {
   data() {
     return {
@@ -129,10 +127,6 @@ export default {
   },
   mounted() {
     this.onFind();
-  },
-  components: {
-    KoaTable,
-    KoaSearch
   }
 };
 </script>
