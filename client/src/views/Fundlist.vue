@@ -52,8 +52,6 @@
 </template>
 
 <script>
-import KoaTable from "@/components/config/table_all";
-import KoaSearch from "@/components/config/from_all";
 import { getProfiles, deleteProfiles, controlProfiles } from "@/api/api";
 import { Config } from "@/components/config/config";
 export default {
@@ -81,10 +79,6 @@ export default {
         ? Config.indexTable.table
         : Config.indexTable.table_employee;
     }
-  },
-  components: {
-    KoaTable,
-    KoaSearch
   },
   created() {
     this.getProfile();
