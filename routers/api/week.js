@@ -21,7 +21,6 @@ router.post('/add', passport.authenticate('jwt', {
             passRes: ''
         })
         let result = await writeone.save()
-        console.log(result)
         ctx.body = result ? true : false
     } catch (error) {
         console.log(error)
@@ -41,9 +40,9 @@ router.post('/approval', passport.authenticate('jwt', {
                 isPass,
                 passRes: ctx.request.body.passRes,
             }
-
+        }, {
+            new: true
         })
-        console.log(result)
         ctx.body = result.ok ? true : false
     } catch (error) {
         console.log(error)
@@ -100,68 +99,4 @@ router.delete('/delete/:id', passport.authenticate('jwt', {
     })
     ctx.body = result ? result : ''
 })
-
-router.get('/json', async ctx => {
-    ctx.body = {
-        sucess: true,
-        parents: [{
-                label: '文件夹1',
-                pid: 0,
-                id: 1
-            },
-            {
-                label: '文件夹2',
-                pid: 0,
-                id: 2
-            },
-            {
-                label: '文件夹3',
-                pid: 0,
-                id: 3
-            },
-            {
-                label: '文件夹1-1',
-                pid: 1,
-                id: 4
-            },
-            {
-                label: '文件夹2-1',
-                pid: 2,
-                id: 5
-            },
-        ],
-        child: [{
-                label: '文件1',
-                pid: 1,
-                id: 1001
-            },
-            {
-                label: '文件2',
-                pid: 1,
-                id: 1002
-            },
-            {
-                label: '文件2-1',
-                pid: 2,
-                id: 1003
-            },
-            {
-                label: '文件1-2',
-                pid: 2,
-                id: 1004
-            },
-            {
-                label: '文件1-1-1',
-                pid: 4,
-                id: 1005
-            },
-            {
-                label: '文件2-1-1',
-                pid: 5,
-                id: 1006
-            },
-        ]
-    }
-})
-
 module.exports = router.routes()
