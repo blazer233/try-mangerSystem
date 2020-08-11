@@ -9,13 +9,37 @@ const week = require('./routers/week.js')
 const profiles = require('./routers/profiles')
 const department = require('./routers/department.js')
 const passport = require('koa-passport')
+const cors = require('koa2-cors');
+const KoaStatic = require('koa-static');
+const server = require('http').createServer(app.callback());
+const io = require('socket.io')(server);
+const port = process.env.PORT || 5000
 
+// app.use(KoaStatic(path.resolve(__dirname, "./public")))
+app.use(KoaStatic(__dirname))
+app.use(KoaStatic('./client_vue'));
+app.use(cors());
 app.use(bodyParser())
 app.use(router.routes())
 app.use(router.allowedMethods())
 app.use(passport.initialize())
 app.use(passport.session())
 require('./config/passport')(passport)
+
+io.on('connection', socket => {
+    socket.on('login', data => {
+        console.log(`用户${data.username}加入`);
+        socket.join(data.username)
+    });
+    socket.on('logout', data => {
+        console.log(`用户${data.username}已离开`);
+        socket.leave(data.username)
+    });
+    //发生错误时触发
+    socket.on('error', err => {
+        console.log(err);
+    });
+});
 
 mongoose.connect("mongodb://localhost:27017/vue", {
         useNewUrlParser: true,
@@ -29,8 +53,6 @@ router.use('/api/week', week)
 router.use('/api/profiles', profiles)
 router.use('/api/department', department)
 
-
-const port = process.env.PORT || 5000
-app.listen(port, () => {
-    console.log(`server run ${port}`)
+server.listen(port, () => {
+    console.log(`http://localhost:${port}`)
 })
