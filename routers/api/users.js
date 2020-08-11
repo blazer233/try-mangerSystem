@@ -3,8 +3,10 @@ const router = new Router()
 const bcrypt = require('bcryptjs')
 const User = require('../models/Users.js')
 const jwt = require('jsonwebtoken')
-const gravatar = 'http://www.gravatar.com/avatar/0eb178cec364c022a189c3814e5f7483?s=200&r=pg&d=mm'
 const passport = require('koa-passport')
+const Control_File = require('../utils')
+const control_File = new Control_File()
+
 
 router.get('/all', passport.authenticate('jwt', {
     session: false
@@ -27,39 +29,54 @@ router.get('/all', passport.authenticate('jwt', {
     }
 })
 
+router.get('/item', passport.authenticate('jwt', {
+    session: false
+}), async ctx => {
+    try {
+        let res = await User.findOne({
+            _id: ctx.params.id
+        })
+        ctx.body = res ? res : ''
+    } catch (error) {
+        console.log(error)
+    }
+})
+
 
 router.post('/register', async ctx => {
     try {
-        if (ctx.request.body.password !== ctx.request.body.password2) {
-            ctx.body = {
-                info: '两次密码输入不同',
+        console.log(ctx.request.body)
+        let find_ = await User.findOne({
+            $or: [{
+                username: ctx.request.body.username
+            }, {
+                email: ctx.request.body.email
+            }]
+        })
+        console.log(find_)
+        if (find_) {
+            ctx.body = find_.username === ctx.request.body.username ? {
+                info: '用户名已注册',
+                success: false
+            } : {
+                info: '邮箱已注册',
                 success: false
             }
         } else {
-            let find_ = await User.findOne({
-                email: ctx.request.body.email
+            let salt = bcrypt.genSaltSync(10);
+            let hash = bcrypt.hashSync(ctx.request.body.password, salt);
+            let newUse = new User({
+                avatar: 'http://localhost:5000/public/avatar.png',
+                username: ctx.request.body.username,
+                password: hash,
+                email: ctx.request.body.email,
+                identity: ctx.request.body.identity
             })
-            if (find_) {
-                ctx.body = {
-                    info: '邮箱已注册',
-                    success: false
-                }
-            } else {
-                let salt = bcrypt.genSaltSync(10);
-                let hash = bcrypt.hashSync(ctx.request.body.password, salt);
-                let newUse = new User({
-                    avatar: gravatar,
-                    username: ctx.request.body.username,
-                    password: hash,
-                    email: ctx.request.body.email,
-                    identity: ctx.request.body.identity
-                })
 
-                let result = await newUse.save()
-                if (result) {
-                    console.log(result)
-                    ctx.body = result
-                }
+            let result = await newUse.save()
+            if (result) {
+                console.log(result)
+                ctx.body = result
             }
         }
     } catch (error) {
@@ -67,18 +84,6 @@ router.post('/register', async ctx => {
     }
 
 })
-
-router.post('/avatar/:id', async ctx => {
-    let result = await User.updateOne({
-        _id: ctx.params.id
-    }, {
-        $set: {
-            "avatar": ctx.request.body.avatar
-        }
-    })
-    ctx.body = result ? result : ''
-})
-
 
 router.post('/login', async ctx => {
     let find_ = await User.findOne({
@@ -102,7 +107,8 @@ router.post('/login', async ctx => {
                 name: find_.username,
                 date: find_.date,
                 avatar: find_.avatar,
-                identity: find_.identity
+                identity: find_.identity,
+                email: find_.email
             }
             let token = jwt.sign(pay, 'art', {
                 expiresIn: 10 * 60 * 60 * 2
@@ -116,18 +122,34 @@ router.post('/login', async ctx => {
 })
 
 //修改头像
+/**
+ * 前端将图片以base流的形式返回给后端，后端将流通过buffer进行处理转换为二进制文件写入对应文件夹，
+ * 返回给数据库图片地址保存
+ * 
+ */
 router.post('/userImg', async ctx => {
     try {
         let userImg = ctx.request.body
+        let res = await User.findOne({
+            _id: userImg._id
+        })
+        let oldPath = res.avatar.replace('http://localhost:5000/', '')
+        let buffer = Buffer.from(userImg.img_, 'base64')
+        console.log(oldPath + '  旧')
+        let path = `public/avatar/${new Date().valueOf()}.png`
+        if (oldPath !== "public/avatar.png" && oldPath) await control_File.unlink(oldPath)
+        await control_File.writeFile(path, buffer)
+        console.log(path + '  新')
         let result = await User.updateOne({
             _id: userImg._id
         }, {
             $set: {
-                avatar: userImg.img_,
+                avatar: `http://localhost:5000/${path}`
             }
         })
-        result.ok ? ctx.body = {
-            success: true
+        ctx.body = result.ok ? {
+            success: true,
+            url: `http://localhost:5000/${path}`
         } : {
             success: false
         }
@@ -143,7 +165,8 @@ router.get('/pre', passport.authenticate('jwt', {
         id: ctx.state.user.id,
         name: ctx.state.user.username,
         email: ctx.state.user.email,
-        date: ctx.state.user.date,
+        date: ctx.state.user.date,  
+        avatar: ctx.state.user.avatar,
     }
 })
 
