@@ -2,7 +2,19 @@ const Router = require('koa-router')
 const router = new Router()
 const passport = require('koa-passport')
 const Profile = require('../models/Profiles')
-
+const multer = require('koa-multer')
+const storage = multer.diskStorage({
+    // 存储的位置
+    destination: `public/pdf/`,
+    // 文件名 
+    filename(req, file, cb) {
+        const filename = file.originalname.split(".")
+        cb(null, `${req.body._id}-${Date.now()}.${filename[filename.length - 1]}`)
+    }
+})
+const upload = multer({
+    storage
+})
 
 //创建信息
 router.post('/add', passport.authenticate('jwt', {
@@ -15,7 +27,20 @@ router.post('/add', passport.authenticate('jwt', {
     } catch (error) {
         console.log('错误是' + error)
     }
+})
 
+//上传pdf文件
+router.post('/toFile', upload.single('file'), async ctx => {
+    try {
+        let url = `/${ctx.req.file.destination}${ctx.req.file.filename}`
+        ctx.body = {
+            url,
+            success: true,
+            mes: '上传成功',
+        }
+    } catch (error) {
+        console.log('错误是' + error)
+    }
 })
 
 //获得全部信息
@@ -45,7 +70,7 @@ router.post('/', passport.authenticate('jwt', {
         if (result) {
             ctx.body = {
                 list: result,
-                total: total
+                total
             }
         } else {
             ctx.body = ''
@@ -53,7 +78,6 @@ router.post('/', passport.authenticate('jwt', {
     } catch (error) {
         console.log(error)
     }
-
 })
 
 // 删除信息
