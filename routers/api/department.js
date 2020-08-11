@@ -13,8 +13,11 @@ const digui = (pArr) => {
     });
     return _arr;
 }
+
 //添加
-router.post('/add', async ctx => {
+router.post('/add', passport.authenticate('jwt', {
+    session: false
+}), async ctx => {
     try {
         let Departmentone = new Department(ctx.request.body)
         let result = await Departmentone.save()
@@ -31,18 +34,20 @@ router.post('/add', async ctx => {
 })
 
 //修改
-router.post('/edit', async ctx => {
+router.post('/edit', passport.authenticate('jwt', {
+    session: false
+}), async ctx => {
     try {
-        console.log(ctx.request.body)
         let result = await Department.updateOne({
             _id: ctx.request.body._id
         }, {
             $set: {
                 label: ctx.request.body.label,
             }
-
+        }, {
+            new: true
         })
-        ctx.body = result.ok ? ctx.body = {
+        ctx.body = result.ok ? {
             info: '修改成功',
             success: true
         } : {
@@ -76,24 +81,21 @@ router.post('/delete', passport.authenticate('jwt', {
         console.log('错误是' + error)
     }
 })
-
-router.get('/save', async ctx => {
+router.get('/all',async ctx => {
     try {
-        let Departmentone = new Department({
-            "label": "所有部门",
-            "pid": '0',
-        })
-        let result = await Departmentone.save()
-        console.log(result)
-        ctx.body = result ? true : false
-    } catch (error) {
-        console.log('错误是' + error)
-    }
-})
-router.get('/all', async ctx => {
-    try {
-        let result = await Department.find()
-        ctx.body = result ? result : false
+        let result = await Department.find().countDocuments()
+        if (!result) {
+            let Departmentone = new Department({
+                "label": "所有部门",
+                "pid": '0',
+            })
+            await Departmentone.save()
+        }
+        let result_1 = await Department.find()
+        ctx.body = {
+            list: result_1,
+            success: true
+        }
     } catch (error) {
         console.log('错误是' + error)
     }
