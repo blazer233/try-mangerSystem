@@ -1,5 +1,13 @@
 # vue - node 前后端管理系统 
 
+## 启动
+npm i (安装)
+npm run server(启动后端)
+
+cd client 
+npm i (安装)
+npm run serve(启动前端)
+
 ### 前端技术点
 + 登陆校验：由 localstorage 密码保存，路由拦截vuex进行检测是否令牌过期，通过后端 jsonwebtoken 设置过期时间
 ```
