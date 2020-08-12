@@ -1,21 +1,35 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import axios from './http'
-import store from './store'
+import store from './store/store'
 import ElementUI from 'element-ui'
+import mixins from './components/mixins/mixins'
 import 'element-ui/lib/theme-chalk/index.css'
 import './components/tree/tree.css'
 import './utils/directives/dialogDrag' //弹窗拖动指令
 import './utils/directives/py' //汉转拼音指令
+import VueSocketIO from 'vue-socket.io'
 import {
   debounce,
-  DateFormat
+  DateFormat,
+  clone,
+  isEmpty
 } from './utils/utils'
-
+const requireComponents = require.context('@/components/config/', false, /\.vue/)
+requireComponents.keys().forEach(i => {
+  const Name = i.split('.')[1].slice(1)
+  const reqCom = requireComponents(i)
+  Vue.component(Name, reqCom.default || reqCom)
+})
 Vue.config.productionTip = false
+Vue.prototype.$clone = clone
+Vue.prototype.$isEmpty = isEmpty
+Vue.mixin(mixins);
 Vue.use(ElementUI)
-Vue.prototype.$axios = axios
+Vue.use(new VueSocketIO({
+  debug: true,
+  connection: 'http://localhost:5000',
+}))
 //防抖 
 Vue.directive('debounce', {
   inserted: function (el, binding) {
