@@ -4,7 +4,7 @@
 npm i (安装)
 npm run server(启动后端)
 
-cd client 
+cd client (定位文件夹)
 npm i (安装)
 npm run serve(启动前端)
 
