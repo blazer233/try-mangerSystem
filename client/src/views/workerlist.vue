@@ -151,7 +151,7 @@ export default {
   font-size: 25px;
   border-bottom: 1px solid;
   margin: 1rem 5rem;
-  padding: 2rem 2rem;
+  padding: 1rem 2rem 0.5rem 2rem;
 }
 .leaveFrom2 {
   margin: 0rem 5rem 0 5rem;
