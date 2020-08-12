@@ -1,27 +1,33 @@
 <template>
   <div class="index">
-    <HeadNav></HeadNav> 
+    <HeadNav></HeadNav>
     <LeftNav></LeftNav>
     <div class="rightContainer">
-      <router-view></router-view>
+      <transition name="fade" mode="out-in">
+        <keep-alive>
+          <router-view />
+        </keep-alive>
+      </transition>
     </div>
+
+    <canvas ref="canvas"></canvas>
   </div>
 </template>
 
 <script>
-import HeadNav from '../components/HeadNav'
-import LeftNav from '../components/LeftNav'
+import HeadNav from "../components/HeadNav";
+import LeftNav from "../components/LeftNav";
 export default {
   name: "index",
   components: {
     HeadNav,
     LeftNav
   }
-}
+};
 </script>
 
 <style scoped>
-.index{
+.index {
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -32,6 +38,12 @@ export default {
   left: 150px;
   width: calc(100% - 150px);
   height: calc(100% - 60px);
-  overflow: auto; 
+  overflow: auto;
+}
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
 }
 </style>
