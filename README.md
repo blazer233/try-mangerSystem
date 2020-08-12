@@ -122,7 +122,7 @@ Vue.directive('DateFormat', {
 ```
 
 ### 后技术点
-+ 文件读写：将文件读写独立封装为构造函数，支持 async await 操作
++ 文件读写：将文件读写独立封装为构造函数，支持 async await 操作(pdf文件上传、图片上传)
 ```
 module.exports = class FileUtils {
     constructor() {}
