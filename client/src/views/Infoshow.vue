@@ -2,21 +2,30 @@
   <div class="infoshow">
     <el-row type="flex" class="row-bg" justify="center">
       <el-col :span="8">
+        <div class="leave">个人信息</div>
         <div class="user">
-          <img :src="user.avatar" />
+          <img
+            :src="user.avatar"
+            ref="img_ava"
+            @mouseenter="enterAvatarImage()"
+            @mouseleave="leaveAvatarImage()"
+          />
+          <span
+            class="span_alert"
+            v-show="span_alert_"
+            @click="setAvatarImage"
+            @mousemove="enterAvatarImage()"
+          >切换头像</span>
         </div>
         <div class="crop-demo">
-          <img :src="cropImg" />
-          <div class="crop-demo-btn">
-            选择图片
-            <input
-              class="crop-input"
-              type="file"
-              name="image"
-              accept="image/*"
-              @change="setImage"
-            />
-          </div>
+          <input
+            class="crop-input"
+            ref="filElem"
+            type="file"
+            name="image"
+            accept="image/*"
+            @change="setImage"
+          />
         </div>
 
         <el-dialog title="裁剪图片" :visible.sync="dialogVisible" width="30%">
@@ -29,7 +38,7 @@
             style="width:100%;height:300px;"
           ></vue-cropper>
           <span slot="footer" class="dialog-footer">
-            <el-button @click="cancelCrop">取 消</el-button>
+            <el-button @click="dialogVisible = false">取 消</el-button>
             <el-button
               type="primary"
               @click="dialogVisible = false"
@@ -50,7 +59,7 @@
           </div>
           <div class="user-item">
             <i class="el-icon-setting"></i>
-            <span v-DateFormat="user.date"></span>
+            <span>{{user.email}}</span>
           </div>
         </div>
       </el-col>
@@ -60,68 +69,69 @@
 
 <script>
 import VueCropper from "vue-cropperjs";
-import { controlUser } from "@/api/api";
+import { controlUser, self } from "@/api/api";
 export default {
   name: "infoshow",
   data() {
     return {
       dialogVisible: false,
       imgSrc: "",
-      cropImg: "",
+      span_alert_: false,
       user: {}
     };
   },
-  created() {
+  mounted() {
     this.user = this.$store.getters.user;
   },
   components: {
     VueCropper
   },
   methods: {
+    enterAvatarImage() {
+      this.span_alert_ = true;
+      this.$refs.img_ava.classList.add("filter_");
+    },
+    leaveAvatarImage() {
+      this.span_alert_ = false;
+      this.$refs.img_ava.classList.remove("filter_");
+    },
+    setAvatarImage() {
+      this.$refs.filElem.dispatchEvent(new MouseEvent("click"));
+      this.span_alert_ = false;
+      this.$refs.img_ava.classList.remove("filter_");
+    },
     setImage(e) {
-      let res = window.URL.createObjectURL(e.target.files[0]);
-      this.imgSrc = res;
-      this.$refs.cropper && this.$refs.cropper.replace(res);
-      this.dialogVisible = true;
+      const file = e.target.files[0];
+      if (!file.type.includes("image/")) return;
+      let reader = new FileReader();
+      reader.onload = event => {
+        this.dialogVisible = true;
+        this.imgSrc = event.target.result;
+        this.$refs.cropper && this.$refs.cropper.replace(event.target.result);
+      };
+      reader.readAsDataURL(file);
     },
     cropImage() {
-      this.user.avatar = this.Base64UrlToBlob(
-        this.$refs.cropper.getCroppedCanvas().toDataURL()
-      );
-      console.log(this.user.avatar)
-    },
-    Base64UrlToBlob(urlData) {
-      urlData = urlData.substring(urlData.indexOf(",") + 1);
-      var binary = atob(urlData);
-      var array = [];
-      for (var i = 0, len = binary.length; i < len; i++) {
-        array.push(binary.charCodeAt(i));
-      }
-      return window.URL.createObjectURL(
-        new Blob([new Uint8Array(array)], { type: "image/jpeg" })
-      );
+      this.$refs.img_ava.classList.remove("filter_");
+      this.span_alert_ = false;
     },
     async cropperStart() {
-      console.log(
-        this.Base64UrlToBlob(this.$refs.cropper.getCroppedCanvas().toDataURL())
-      );
       let obj = {
-        img_: this.Base64UrlToBlob(
-          this.$refs.cropper.getCroppedCanvas().toDataURL()
-        ),
+        img_: this.$refs.cropper
+          .getCroppedCanvas()
+          .toDataURL()
+          .replace(/^data:image\/\w+;base64,/, ""),
         _id: this.$store.getters.user.id
       };
       let { data } = await controlUser("/userImg", obj);
       if (data.success) {
-        this.$message({ message: "更换成功！", type: "success" });
-        this.$store.dispatch("setUser_img", obj.img_);
+        this.$message({ message: "更换成功！下次登录时变更", type: "success" });
+        let res = await self();
+        this.userInfo = res.data;
+        this.$store.getters.user.avatar = this.userInfo.avatar;
       } else {
         this.$message({ message: "更换失败！", type: "error" });
       }
-    },
-    cancelCrop() {
-      this.dialogVisible = false;
-      this.user.avatar = this.$store.getters.user.avatar;
     },
     handleError() {
       this.$notify.error({
@@ -134,6 +144,12 @@ export default {
 </script>
 
 <style scoped>
+.leave {
+  font-size: 25px;
+  border-bottom: 1px solid;
+  margin: 1rem 5rem;
+  padding: 1rem 2rem 0.5rem 2rem;
+}
 .infoshow {
   width: 100%;
   height: 100%;
@@ -165,6 +181,9 @@ export default {
 .userinfo {
   height: 100%;
   background-color: #eee;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .user-item {
   position: relative;
@@ -205,23 +224,17 @@ export default {
   display: flex;
   align-items: flex-end;
 }
-.crop-demo-btn {
-  line-height: 40px;
-  padding: 0 20px;
-  background-color: #409eff;
-  color: #fff;
-  font-size: 14px;
-  border-radius: 4px;
-  box-sizing: border-box;
-  transform: translate(355%, 500px);
-}
 .crop-input {
-  position: absolute;
-  width: 100px;
-  height: 40px;
-  left: 0;
-  top: 0;
   opacity: 0;
+}
+.span_alert {
+  position: absolute;
+  z-index: 2;
+  top: 3rem;
+  left: 21.6rem;
   cursor: pointer;
+}
+.filter_ {
+  filter: blur(2px);
 }
 </style>
