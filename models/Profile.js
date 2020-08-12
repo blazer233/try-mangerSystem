@@ -21,6 +21,9 @@ const newSchema = new Schema({
     remark: {
         type: String
     },
+    file: {
+        type: Array
+    },
     date: {
         type: String,
         required: true
