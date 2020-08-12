@@ -1,71 +1,59 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Index from './views/index.vue'
-import Notfound from './views/404.vue'
-import LoginReg from './views/LoginReg.vue'
-import Home from './views/Home.vue'
-import Infoshow from './views/Infoshow.vue'
-import Fundlist from './views/Fundlist.vue'
-import workerlist from './views/workerlist.vue'
 Vue.use(Router)
-
+ 
 const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [{
       path: '/',
-      redirect: '/index'
+      redirect: '/home'
     },
     {
       path: '/index',
-      name: 'index',
-      component: Index,
+      name: 'home',
+      component: () => import('@/views/index.vue'),
       children: [{
-          path: "",
-          component: Home
-        },
-        {
           path: "/home",
           name: "home",
-          component: Home
+          component: () => import('@/views/Home.vue')
         },
         {
           path: "/infoshow",
           name: "infoshow",
-          component: Infoshow
+          component: () => import('@/views/Infoshow.vue')
         },
         {
           path: "/fundlist",
           name: "fundlist",
-          component: Fundlist
+          component: () => import('@/views/Fundlist.vue')
         },
         {
           path: "/workerlist",
           name: "workerlist",
-          component: workerlist
+          component: () => import('@/views/workerlist.vue')
         },
         {
-          path: "/workerlist",
-          name: "workerlist",
-          component: workerlist
+          path: "/schart",
+          name: "schart",
+          component: () => import('@/views/schart.vue')
         }
-
       ]
     },
     {
       path: '/Notfound',
       name: '/404',
-      component: Notfound
+      component: () => import('@/views/404.vue')
     },
     {
       path: '/login',
       name: 'login',
-      component: LoginReg
+      component: () => import('@/views/LoginReg.vue')
     }
   ]
 })
 
-//路由守卫
+//路由守卫 
 router.beforeEach((to, from, next) => {
   const isLogin = localStorage.eleToken ? true : false
   if (to.path == "/login" || to.path == "/register") {
