@@ -1,28 +1,31 @@
 <template>
-  <div class="fillcontain">
-    <div class="center_">
-      <!-- 筛选表单 -->
-      <koa-search
-        :type_="0"
-        :search_all="tableSearch"
-        :controlType="controlType"
-        @getList="getProfile"
-        size="mini"
-        :isinline="true"
+  <div>
+    <div class="leave">资金流水</div>
+    <div class="content_">
+      <div class="center_">
+        <!-- 筛选表单 -->
+        <koa-search
+          :type_="0"
+          :search_all="tableSearch"
+          :controlType="controlType"
+          @getList="getProfile"
+          size="mini"
+          :isinline="true"
+        />
+        <i class="el-icon-edit-outline addOne" @click="onAddMoney" title="添加"></i>
+      </div>
+      <!-- 内容表格 -->
+      <!-- <p v-py="name"></p> -->
+      <!-- <input type="text" id="input" v-debounce="find" /> -->
+      <koa-table
+        :tableHeader="tableHeader"
+        :tableData="tableData"
+        :total="total"
+        @pagination_size_change="set_getProfile"
+        @delOne="onDeleteMoney"
+        @editOne="onEditMoney"
       />
-      <i class="el-icon-edit-outline addOne" @click="onAddMoney" title="添加"></i>
     </div>
-    <!-- 内容表格 -->
-    <!-- <p v-py="name"></p> -->
-    <input type="text" id="input" v-debounce="find" />
-    <koa-table
-      :tableHeader="tableHeader"
-      :tableData="tableData"
-      :total="total"
-      @pagination_size_change="set_getProfile"
-      @delOne="onDeleteMoney"
-      @editOne="onEditMoney"
-    />
     <!-- 弹框页面 -->
     <el-dialog
       :visible.sync="dialog.show"
@@ -119,12 +122,14 @@ export default {
     },
     // 编辑
     onEditMoney(row) {
+      console.log(row._id);
+      localStorage.setItem("_id", row._id);
       this.dialog = {
         show: true,
         title: "修改资金信息",
         option: "edit"
       };
-      this.$nextTick(function() {
+      this.$nextTick(() => {
         this.$refs.search_.search_from = {
           type: row.type,
           describe: row.describe,
@@ -132,6 +137,7 @@ export default {
           expend: row.expend,
           cash: row.cash,
           remark: row.remark,
+          file: row.file,
           id: row._id,
           date: new Date().getTime()
         };
@@ -144,7 +150,7 @@ export default {
         title: "添加资金信息",
         option: "add"
       };
-      this.$nextTick(function() {
+      this.$nextTick(() => {
         this.$refs.search_.search_from = {};
       });
     },
@@ -164,6 +170,15 @@ export default {
 };
 </script> 
 <style >
+.content_ {
+  margin: 0rem 5rem 0 5rem;
+}
+.leave {
+  font-size: 25px;
+  border-bottom: 1px solid;
+  margin: 1rem 5rem;
+  padding: 1rem 2rem 0.5rem 2rem;
+}
 .dialog_class {
   font-weight: bold;
   font-size: 20px;
@@ -184,12 +199,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.fillcontain {
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  box-sizing: border-box;
 }
 
 .btnRight {
