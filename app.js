@@ -10,12 +10,17 @@ const profiles = require('./routers/profiles')
 const department = require('./routers/department.js')
 const passport = require('koa-passport')
 const cors = require('koa2-cors');
+const {
+    historyApiFallback
+} = require('koa2-connect-history-api-fallback')
 const KoaStatic = require('koa-static');
 const server = require('http').createServer(app.callback());
 const io = require('socket.io')(server);
 const port = process.env.PORT || 5000
 
-// app.use(KoaStatic(path.resolve(__dirname, "./public")))
+app.use(historyApiFallback({
+    enable: true
+}));
 app.use(KoaStatic(__dirname))
 app.use(KoaStatic('./client_vue'));
 app.use(cors());
