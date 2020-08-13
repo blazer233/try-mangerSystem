@@ -6,7 +6,6 @@ module.exports = {
     outputDir: __dirname + '/../client_vue', // 构建输出目录       
 
     devServer: {
-        open: true,
-        port: 5000,
+        port: 9000,
     }
 }
