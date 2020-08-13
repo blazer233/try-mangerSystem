@@ -129,6 +129,7 @@ export default {
   margin: auto;
   width: 1300px;
   height: 900px;
+    transform: scale(0.85);
 }
 .schart-box {
   margin: 20px;
