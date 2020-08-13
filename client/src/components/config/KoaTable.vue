@@ -36,7 +36,7 @@
               class="over_ellipsis"
               v-DateFormat="scope.row[item.prop]"
             ></div>
-            <div v-else-if="item.type==='file'">
+            <div v-else-if="item.type==='file' && scope.row[item.prop].length">
               <a
                 :href="'http://localhost:5000'+scope.row[item.prop][0].url"
                 :title="scope.row.type+'--'+scope.row[item.prop][0].name"
@@ -58,7 +58,7 @@
             >{{ scope.row.date0}}--{{ scope.row.date1}}</div>
             <span :title="scope.row[item.prop]" v-else>
               {{
-              scope.row[item.prop]
+              Array.isArray(scope.row[item.prop]) || '' ?'暂无':scope.row[item.prop]
               }}
             </span>
           </template>
