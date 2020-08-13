@@ -2,6 +2,8 @@ const koa = require('koa')
 const Router = require('koa-router')
 const app = new koa()
 const router = new Router()
+const Moment = require("moment");
+const Koa_Logger = require("koa-logger");
 const mongoose = require('mongoose')
 const bodyParser = require('koa-bodyparser')
 const users = require('./routers/user.js')
@@ -10,14 +12,17 @@ const profiles = require('./routers/profiles')
 const department = require('./routers/department.js')
 const passport = require('koa-passport')
 const cors = require('koa2-cors');
-const {
-    historyApiFallback
-} = require('koa2-connect-history-api-fallback')
 const KoaStatic = require('koa-static');
 const server = require('http').createServer(app.callback());
 const io = require('socket.io')(server);
 const port = process.env.PORT || 5000
+const {
+    historyApiFallback
+} = require('koa2-connect-history-api-fallback')
 
+const logger = Koa_Logger((str) => {
+    console.log(Moment().format('YYYY-MM-DD HH:mm:ss') + str);
+});
 app.use(historyApiFallback({
     enable: true
 }));
@@ -33,11 +38,11 @@ require('./config/passport')(passport)
 
 io.on('connection', socket => {
     socket.on('login', data => {
-        console.log(`用户${data.username}加入`);
+        console.log(`${Moment().format('YYYY-MM-DD HH:mm:ss')}   用户${data.username}加入`);
         socket.join(data.username)
     });
     socket.on('logout', data => {
-        console.log(`用户${data.username}已离开`);
+        console.log(`${Moment().format('YYYY-MM-DD HH:mm:ss')}   用户${data.username}已离开`);
         socket.leave(data.username)
     });
     //发生错误时触发
@@ -50,14 +55,15 @@ mongoose.connect("mongodb://localhost:27017/vue", {
         useNewUrlParser: true,
         useUnifiedTopology: true
     })
-    .then(() => console.log('mongoose true'))
-    .catch((err) => console.log('mongoose false' + err))
+    .then(() => console.log(`${Moment().format('YYYY-MM-DD HH:mm:ss')}   mongoose true`))
+    .catch((err) => console.log(`${Moment().format('YYYY-MM-DD HH:mm:ss')}   mongoose false ${err}`))
 
 router.use('/api/users', users)
 router.use('/api/week', week)
 router.use('/api/profiles', profiles)
-router.use('/api/department', department)
+router.use('/api/department', department) 
+app.use(logger);
 
 server.listen(port, () => {
-    console.log(`http://localhost:${port}`)
+    console.log(`${Moment().format('YYYY-MM-DD HH:mm:ss')}   http://localhost:${port}`)
 })
