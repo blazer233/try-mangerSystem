@@ -1,5 +1,8 @@
 # vue - node 前后端管理系统 
-
+##地址
+```
+https://github.com/blazer233/try-mangerSystem
+```
 ## 启动
 npm i (安装)
 npm run server(启动后端)
