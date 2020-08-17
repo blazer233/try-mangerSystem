@@ -179,17 +179,21 @@ export default {
       this.$refs.up.dispatchEvent(new MouseEvent("click"));
     },
     async setExcel() {
-      let reader = new FileReader();
-      reader.readAsDataURL(files_.files[0]);
-      reader.onload = async event => {
-        let { data } = await upFiles({
-          file: event.target.result.split(",")[1]
-        });
-        console.log(data);
-        data.success
-          ? this.getProfile()
-          : this.$message({ message: data.info, type: "error" });
-      };
+      if (files_.files[0].name.includes(".xlsx")) {
+        let reader = new FileReader();
+        reader.readAsDataURL(files_.files[0]);
+        reader.onload = async event => {
+          let { data } = await upFiles({
+            file: event.target.result.split(",")[1]
+          });
+          console.log(data);
+          data.success
+            ? this.getProfile()
+            : this.$message({ message: data.info, type: "error" });
+        }; 
+      } else {
+        this.$message({ message: "请上传.xlsx类型文件", type: "error" });
+      }
     },
     // 弹出添加添加
     onAddMoney() {
