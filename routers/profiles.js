@@ -113,11 +113,15 @@ router.post('/upFile', passport.authenticate('jwt', {
         let excel = xlsx.parse(buffer);
         let excel_ = excel[0].data
         excel_.shift()
-        // excel_.map(i => {
-        //     if (!pattern.test(i[1])) {
-        //         i[1]
-        //     }
-        // })
+        excel_.map(i => {
+            if (!pattern.test(i[1])) {
+                ctx.body = {
+                    success: false,
+                    info: '上传Excel文件的时间格式请与原数据一致'
+                }
+                throw Error('时间格式不正确');
+            }
+        })
         let insertData = excel_.reduce((arr, item) => {
             arr.push({
                 date: +new Date(String(item[1])),
