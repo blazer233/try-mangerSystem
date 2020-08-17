@@ -23,6 +23,7 @@ const {
 const logger = Koa_Logger((str) => {
     console.log(Moment().format('YYYY-MM-DD HH:mm:ss') + str);
 });
+app.use(logger);
 app.use(historyApiFallback({
     enable: true
 }));
@@ -62,7 +63,6 @@ router.use('/api/users', users)
 router.use('/api/week', week)
 router.use('/api/profiles', profiles)
 router.use('/api/department', department) 
-app.use(logger);
 
 server.listen(port, () => {
     console.log(`${Moment().format('YYYY-MM-DD HH:mm:ss')}   http://localhost:${port}`)
