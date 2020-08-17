@@ -1,6 +1,25 @@
 const fs = require('fs')
 
-module.exports = class FileUtils {
+const timeFormat = (date, type = "yyyy-mm-dd hh:ii:ss") => {
+    var date = new Date(Number(date));
+    var o = {
+        "m+": date.getMonth() + 1, //月份   
+        "d+": date.getDate(), //日   
+        "h+": date.getHours(), //小时   
+        "i+": date.getMinutes(), //分    
+        "s+": date.getSeconds(), //秒   
+    };
+    if (/(y+)/.test(type)) {
+        type = type.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+    };
+    for (var k in o) {
+        if (new RegExp("(" + k + ")").test(type)) {
+            type = type.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        };
+    }
+    return type;
+}
+class FileUtils {
     constructor() {}
     checkFile(path) {
         return new Promise((resolve, reject) => {
@@ -39,9 +58,7 @@ module.exports = class FileUtils {
                     encoding: 'utf8',
                     autoClose: true,
                 });
-
                 var remaining = '';
-
                 read_file.on('data', function (data) {
                     remaining += data;
                     var index = remaining.indexOf('\n');
@@ -99,4 +116,9 @@ module.exports = class FileUtils {
             }
         });
     }
+}
+
+module.exports = {
+    FileUtils,
+    timeFormat
 }
