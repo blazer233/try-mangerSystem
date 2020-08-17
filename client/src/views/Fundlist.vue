@@ -12,9 +12,27 @@
           size="mini"
           :isinline="true"
         />
+        <input
+          type="file"
+          ref="up"
+          id="files_"
+          style="visibility: hidden;"
+          name="excel"
+          accept=".xls*"
+          @input="setExcel"
+        />
+        <el-button type="loadOne" plain size="mini" title="导入表单" @click="upFile">导入表单</el-button>
+        <el-button
+          type="loadOne"
+          plain
+          size="mini"
+          title="导出表单"
+          @click="loadFile"
+          style="margin-left: -10rem;"
+        >导出表单</el-button>
         <i class="el-icon-edit-outline addOne" @click="onAddMoney" title="添加"></i>
       </div>
-      <!-- 内容表格 -->
+      <!-- 内容表格    action="http://localhost:5000/api/profiles/upFile"-->
       <!-- <p v-py="name"></p> -->
       <!-- <input type="text" id="input" v-debounce="find" /> -->
       <koa-table
@@ -55,8 +73,15 @@
 </template>
 
 <script>
-import { getProfiles, deleteProfiles, controlProfiles } from "@/api/api";
+import {
+  getProfiles,
+  deleteProfiles,
+  controlProfiles,
+  loadFiles,
+  upFiles
+} from "@/api/api";
 import { Config } from "@/components/config/config";
+import fileSaver from "file-saver";
 export default {
   name: "fundlist",
   data() {
@@ -122,7 +147,6 @@ export default {
     },
     // 编辑
     onEditMoney(row) {
-      console.log(row._id);
       localStorage.setItem("_id", row._id);
       this.dialog = {
         show: true,
@@ -142,6 +166,30 @@ export default {
           date: new Date().getTime()
         };
       });
+    },
+    //导出表格为excel
+    async loadFile() {
+      let res = await loadFiles();
+      let buffer = new Uint8Array(res.data.info.data);
+      let blob = new Blob([buffer], { type: "application/octet-stream" });
+      fileSaver.saveAs(blob, "资金表格清单.xlsx");
+    },
+    upFile() {
+      this.$refs.up.value = null;
+      this.$refs.up.dispatchEvent(new MouseEvent("click"));
+    },
+    async setExcel() {
+      let reader = new FileReader();
+      reader.readAsDataURL(files_.files[0]);
+      reader.onload = async event => {
+        let { data } = await upFiles({
+          file: event.target.result.split(",")[1]
+        });
+        console.log(data);
+        data.success
+          ? this.getProfile()
+          : this.$message({ message: data.info, type: "error" });
+      };
     },
     // 弹出添加添加
     onAddMoney() {
