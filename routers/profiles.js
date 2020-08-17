@@ -121,6 +121,13 @@ router.post('/upFile', passport.authenticate('jwt', {
                 }
                 throw Error('时间格式不正确');
             }
+            if (i.length !== 9) {
+                ctx.body = { 
+                    success: false,
+                    info: '请勿增删表格头'
+                }
+                throw Error('请勿增删表格头');
+            }
         })
         let insertData = excel_.reduce((arr, item) => {
             arr.push({
@@ -139,8 +146,7 @@ router.post('/upFile', passport.authenticate('jwt', {
             return arr
         }, [])
         await Profile.deleteMany()
-        let res = await Profile.insertMany(insertData)
-        console.log(res)
+        await Profile.insertMany(insertData)
         ctx.status = 200
         ctx.body = {
             success: true
