@@ -1,14 +1,16 @@
 const Router = require('koa-router')
 const router = new Router()
+const xlsx = require('node-xlsx')
 const passport = require('koa-passport')
 const Profile = require('../models/Profiles')
 const multer = require('koa-multer')
+const Util = require('../utils')
+const timeFormat = Util.timeFormat
 const storage = multer.diskStorage({
     // 存储的位置
     destination: `public/pdf/`,
     // 文件名 
     filename(req, file, cb) {
-        console.log(req.body._id)
         const filename = file.originalname.split(".")
         cb(null, `${req.body._id}-${Date.now()}.${filename[filename.length - 1]}`)
     }
@@ -44,7 +46,7 @@ router.post('/toFile', upload.single('file'), async ctx => {
     }
 })
 
-//获得全部信息
+//获得当前页信息
 //ctx.request是context经过封装的请求对象，ctx.req是context提供的node.js原生HTTP请求对象
 router.post('/', passport.authenticate('jwt', {
     session: false
@@ -101,4 +103,79 @@ router.post('/edit/:id', passport.authenticate('jwt', {
     ctx.body = result ? result : ''
 })
 
+//导入表单
+router.post('/upFile', passport.authenticate('jwt', {
+    session: false
+}), async ctx => {
+    try {
+        let pattern = /\d{4}(\-|\/|.)\d{1,2}\1\d{1,2}/;
+        let buffer = Buffer.from(ctx.request.body.file, 'base64')
+        let excel = xlsx.parse(buffer);
+        let excel_ = excel[0].data
+        excel_.shift()
+        // excel_.map(i => {
+        //     if (!pattern.test(i[1])) {
+        //         i[1]
+        //     }
+        // })
+        let insertData = excel_.reduce((arr, item) => {
+            arr.push({
+                date: +new Date(String(item[1])),
+                type: item[2],
+                describe: item[3],
+                income: item[4],
+                expend: item[5],
+                cash: item[6],
+                remark: item[7],
+                file: item[8] && item[8].includes('--') ? [{
+                    name: item[8].split('--')[0],
+                    url: item[8].split('--')[1]
+                }] : [],
+            })
+            return arr
+        }, [])
+        await Profile.deleteMany()
+        let res = await Profile.insertMany(insertData)
+        console.log(res)
+        ctx.status = 200
+        ctx.body = {
+            success: true
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+//导出表单
+router.get('/loadFile', passport.authenticate('jwt', {
+    session: false
+}), async ctx => {
+    try {
+        let data = [
+            ['序号', '创建时间', '收支类型', '收支描述', '收入', '支出', '账户现金', '备注', '档案']
+        ]
+        let result = await Profile.find()
+        let options = {
+            '!cols': Array.from({
+                length: 10
+            }, i => i = {
+                wch: 20
+            })
+        };
+        result.forEach((i, index) => {
+            let row = [index + 1, timeFormat(i.date), i.type, i.describe, i.income, i.expend, i.cash, i.remark, i.file.length ? i.file[0].name + '--' + i.file[0].url : '暂无']
+            data.push(row);
+        })
+        let buffer = xlsx.build([{
+            name: "资金表格清单",
+            data
+        }], options);
+        ctx.body = {
+            info: buffer,
+            success: true
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
 module.exports = router.routes()
