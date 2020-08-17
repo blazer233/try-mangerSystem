@@ -1,5 +1,6 @@
 import axios_ from '../http'
 const isDev = process.env.NODE_ENV === "production" ? false : true;
+
 function Axios(options) {
     var requestObj = {
         url: options.url,
@@ -77,6 +78,23 @@ export function controlProfiles(url, obj) {
     }, {});
     return axios_(Axios(temp));
 }
+//导出表格为excel
+export function loadFiles() {
+    var temp = Object.assign({
+        url: isDev ? `/profiles/loadFile` : `/profiles/loadFile`,
+    }, {});
+    return axios_(Axios(temp));
+}
+//导入表格
+export function upFiles(obj) {
+    var temp = Object.assign({
+        url: isDev ? `/profiles/upFile` : `/profiles/upFile`,
+        method: 'post',
+        data: obj
+    }, {});
+    return axios_(Axios(temp));
+}
+
 //部门查询
 export function getDepartment() {
     var temp = Object.assign({
