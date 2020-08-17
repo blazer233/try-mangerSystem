@@ -19,7 +19,7 @@ const newSchema = new Schema({
         required: true
     },
     remark: {
-        type: String
+        type: String 
     },
     file: {
         type: Array
