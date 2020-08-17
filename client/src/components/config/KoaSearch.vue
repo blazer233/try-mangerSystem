@@ -228,7 +228,6 @@ export default {
     search_from: {
       immediate: true,
       handler(val) {
-        console.log(val);
         if (val.file && val.file.length) {
           this.file_up = false;
           this.fileLists = this.search_from.file;
