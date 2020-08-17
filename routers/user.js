@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs')
 const User = require('../models/Users.js')
 const jwt = require('jsonwebtoken')
 const passport = require('koa-passport')
-const Control_File = require('../utils')
-const control_File = new Control_File()
+const Util = require('../utils')
+const control_File = new Util.FileUtils()
 
 
 router.get('/all', passport.authenticate('jwt', {
@@ -165,7 +165,7 @@ router.get('/pre', passport.authenticate('jwt', {
         id: ctx.state.user.id,
         name: ctx.state.user.username,
         email: ctx.state.user.email,
-        date: ctx.state.user.date,  
+        date: ctx.state.user.date,
         avatar: ctx.state.user.avatar,
     }
 })
