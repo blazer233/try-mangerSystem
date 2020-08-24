@@ -146,26 +146,25 @@ export default {
       }
     },
     // 编辑
-    onEditMoney(row) {
+    async onEditMoney(row) {
       localStorage.setItem("_id", row._id);
       this.dialog = {
         show: true,
         title: "修改资金信息",
         option: "edit"
       };
-      this.$nextTick(() => {
-        this.$refs.search_.search_from = {
-          type: row.type,
-          describe: row.describe,
-          income: row.income,
-          expend: row.expend,
-          cash: row.cash,
-          remark: row.remark,
-          file: row.file,
-          id: row._id,
-          date: new Date().getTime()
-        };
-      });
+      await this.$nextTick();
+      this.$refs.search_.search_from = {
+        type: row.type,
+        describe: row.describe,
+        income: row.income,
+        expend: row.expend,
+        cash: row.cash,
+        remark: row.remark,
+        file: row.file,
+        id: row._id,
+        date: new Date().getTime()
+      };
     },
     //导出表格为excel
     async loadFile() {
