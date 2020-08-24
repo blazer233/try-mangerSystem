@@ -323,16 +323,15 @@ export default {
         dangerouslyUseHTMLString: true
       });
     },
-    searchTable(res) {
-      this.$nextTick(() => {
-        this.$refs[res].validate(valid => {
-          valid
-            ? this.$emit(
-                "getList",
-                Object.assign(this.search_from, { file: this.fileLists })
-              )
-            : "";
-        });
+    async searchTable(res) {
+      await this.$nextTick();
+      this.$refs[res].validate(valid => {
+        valid
+          ? this.$emit(
+              "getList",
+              Object.assign(this.search_from, { file: this.fileLists })
+            )
+          : "";
       });
     },
     resetForm(res) {
