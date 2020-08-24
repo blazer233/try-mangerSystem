@@ -195,15 +195,14 @@ export default {
       }
     },
     // 弹出添加添加
-    onAddMoney() {
+    async onAddMoney() {
       this.dialog = {
-        show: true,
+        show: true,  
         title: "添加资金信息",
         option: "add"
       };
-      this.$nextTick(() => {
-        this.$refs.search_.search_from = {};
-      });
+      await this.$nextTick();
+      this.$refs.search_.search_from = {};
     },
     // 删除
     async onDeleteMoney(row) {
