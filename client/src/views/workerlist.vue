@@ -106,11 +106,10 @@ export default {
           type: "success"
         });
         this.show = false;
-        this.$nextTick(function() {
-          this.$store.getters.user.identity
-            ? this.$refs.search_er.resetForm("search_from")
-            : this.$refs.search_ee.resetForm("search_from");
-        });
+        await this.$nextTick();
+        this.$store.getters.user.identity
+          ? this.$refs.search_er.resetForm("search_from")
+          : this.$refs.search_ee.resetForm("search_from");
       }
     },
     // 操作
