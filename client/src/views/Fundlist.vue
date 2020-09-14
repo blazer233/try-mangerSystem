@@ -131,6 +131,7 @@ export default {
       );
       let res = await getProfiles(cc);
       this.tableData = res.data.list;
+      console.log(this.tableData);
       this.total = res.data.total;
     },
     async dialog_(obj) {
@@ -185,11 +186,10 @@ export default {
           let { data } = await upFiles({
             file: event.target.result.split(",")[1]
           });
-          console.log(data);
           data.success
             ? this.getProfile()
             : this.$message({ message: data.info, type: "error" });
-        }; 
+        };
       } else {
         this.$message({ message: "请上传.xlsx类型文件", type: "error" });
       }
@@ -197,7 +197,7 @@ export default {
     // 弹出添加添加
     async onAddMoney() {
       this.dialog = {
-        show: true,  
+        show: true,
         title: "添加资金信息",
         option: "add"
       };
